@@ -40,3 +40,10 @@ function reset(){
 		$(this).text('');
 	});
 }
+
+var detaili = 0;
+function detailPrc() {
+	++detaili;
+	msg = detaili+"<div id='content'"+detaili>"<div>";
+	DetailDiv.innerHTML += msg;
+}

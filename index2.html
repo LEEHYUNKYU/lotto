@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Document</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.0/react.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.0/react-dom.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+<link rel="stylesheet" type="text/css" href="magicVKeypad/magicVKeypad.css">
+<script type="text/javascript" src="magicVKeypad/magicjs_1.2.1.4.min.js"></script>
+<script type="text/javascript" src="magicVKeypad/magicVKeypadO.js"></script>
+</head>
+
+<script type="text/javascript">
+function onCreate() {
+    // 화면출력용
+    document.getElementById("title1").value = '<input\nds-kb-type = "키보드타입"\nds-kb-focus = "포커스이벤트시 키보드출력"\nds-kb-xy = "키보드출력 좌표(PC)"\nds-kb-callback = "키보드엔터콜백">';
+    document.getElementById("title2").value = '<input id="passwd1" \nds-kb-type = "qwerty"\nds-kb-focus = "true"\nds-kb-xy = "[0, 0]"\nds-kb-callback="getPassword">';
+    document.getElementById("title3").value = '<input id="passwd2" \nds-kb-type = "number"\nds-kb-focus = "false"\nds-kb-xy = "[0, 0]">';
+
+    // 초기화
+    ML4WebVKey.init();
+}
+
+function getPassword(elementId) {
+    // 클라이언트에서 비밀번호 확인 샘플
+    // 파라미터 : 가상키보드가 적용된 <input> id 
+    var result = ML4WebVKey.getDecryptedPassword(elementId, function(message){
+        trace("복호화된 입력값 : " + message);	
+    });	
+}
+
+function getPassword2() {
+    // 서버에서 비밀번호 확인 샘플
+    // 파라미터 : 가상키보드가 적용된 <input> id 
+    // 멀티파라미터 ML4WebVKey.getEncryptedPassword('passwd1', 'passwd2');
+    var message = ML4WebVKey.getEncryptedPassword('passwd1','passwd2');
+    
+    trace("암호화된 입력값 : " + message);
+    
+    MLServlet.secureAjax(ML4WebVKey.getServlet(), message, function(callback){
+        trace("응답결과 : " + callback.message);		
+    });
+}
+
+function showKeyboard(elementId) {
+    ML4WebVKey.showKeyboard(elementId);
+}
+
+function trace(log) {
+    var caller  = arguments.callee.caller.name;
+    var element = document.getElementById("logDiv");
+    var value   = element.value;
+    
+    value = value + log + "\n";
+    
+    element.value = value;
+    element.scrollTop = element.scrollHeight;
+}
+
+</script>
+<body>
+<div id="content"></div>
+
+<script type="text/babel">
+var CommentBox = React.createClass({ 
+	render: function() { 
+		return ( 
+			<div className="commentBox">
+            <textarea id="title1" readonly="readonly" rows="5" style="width: 95%; resize: none; border: none;"></textarea>
+            <hr color="green"/>
+
+            <textarea id="title2" readonly="readonly" rows="5" style="width: 95%; resize: none; border: none;"></textarea>
+            <input type="password" id="passwd1" name="passwd" ds-kb-type="qwerty" ds-kb-focus="true" ds-kb-xy="[0, 0]" ds-kb-callback="getPassword" />
+            <button onclick="showKeyboard('passwd1')">Qwerty 키보드</button>
+            <p></p>
+            <button onclick="getPassword('passwd1')">비밀번호확인</button>
+            <hr/>
+
+            <textarea id="title3" readonly="readonly" rows="4" style="width: 95%; resize: none; border: none;"></textarea>
+            <input type="password" id="passwd2" name="passwd" ds-kb-type="number" ds-kb-focus="false" ds-kb-xy="[0, 0]"/>
+            <button onclick="showKeyboard('passwd2')">Number 키보드</button>
+            <p></p>
+            <button onclick="getPassword('passwd2')">비밀번호확인</button>
+            <hr color="blue"/>
+            <br/>
+            <button onclick="getPassword2()">비밀번호 서버 전송</button>
+            <br/><br/>
+
+            <textarea id="logDiv" readonly="readonly" cols="100" rows="6" style="width: 95%; resize: none; background-color: #B5B6B6"></textarea>
+            </div> 
+
+		); 
+	} 
+}); 
+ReactDOM.render( <CommentBox />, document.getElementById('content') );
+</script>
+ 
+</body> 
+</html>
